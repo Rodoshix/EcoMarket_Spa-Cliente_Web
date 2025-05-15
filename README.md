@@ -53,7 +53,7 @@ Este microservicio consume:
 
 ## Cómo probar con Postman
 Importa la colección incluida:  
-**`EcoMarket-ClienteWeb-JWT-Rutas-Corregidas-Postman`**
+**`EcoMarket - Cliente_Web-service.postman_collection.json`**
 
 1. **Login para obtener token JWT:**
 
