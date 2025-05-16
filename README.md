@@ -1,6 +1,6 @@
 # EcoMarket SPA - Microservicio Cliente Web
 
-Este microservicio forma parte del sistema distribuido **EcoMarket SPA**, y se encarga de gestionar funcionalidades del cliente final como:
+Este microservicio forma parte del sistema distribuido **EcoMarket SPA** para proyecto semestral FullStack_1, y se encarga de gestionar funcionalidades del cliente final como:
 
 - Carrito de compras temporal
 - Lista de productos favoritos
