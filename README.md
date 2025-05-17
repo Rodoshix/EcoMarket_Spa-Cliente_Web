@@ -21,7 +21,7 @@ Además, **consume microservicios externos** para validar usuarios y productos, 
 - Lombok
 - MySQL (XAMPP)
 - Postman (para pruebas)
-
+- JWT (para validación de seguridad con usuarios-auth-service)
 ---
 
 ## Configuración del entorno
@@ -48,6 +48,17 @@ server.port=8083
 
 ---
 
+## Funcionalidades
+
+- Gestionar historial de navegación de productos por usuario.
+- Añadir o eliminar productos favoritos.
+- Agregar, consultar y vaciar el carrito de compras.
+- Validación de usuario con token JWT.
+- Consulta de productos desde `inventario-service`.
+- Preparación de la venta: este microservicio puede estructurar los productos del carrito para enviar a `venta-service`.
+
+---
+
 ## Arquitectura
 
 Este microservicio consume:
@@ -57,21 +68,43 @@ Este microservicio consume:
 
 ---
 
-## Endpoints expuestos por cliente-web
+## Endpoints disponibles
 
-### Requieren token JWT
+### Carrito
 
-| Método | Ruta                                | Descripción                           |
-|--------|-------------------------------------|---------------------------------------|
-| POST   | `/api/carrito`                      | Agrega un producto al carrito         |
-| DELETE | `/api/carrito/{email}`              | Vacía el carrito del usuario          |
-| DELETE | `/api/carrito/{email}/producto/{id}`| Elimina un producto del carrito       |
-| POST   | `/api/favoritos`                    | Agrega un producto a favoritos        |
-| DELETE | `/api/favoritos/{email}/producto/{id}` | Elimina un producto de favoritos   |
-| POST   | `/api/historial`                    | Registra una navegación de producto   |
-| GET    | `/api/carrito/{email}`              | Obtiene el carrito del usuario        |
-| GET    | `/api/favoritos/{email}`            | Obtiene la lista de favoritos         |
-| GET    | `/api/historial/{email}`            | Obtiene el historial de navegación    |
+| Método | Ruta                                         | Descripción                         |
+|--------|----------------------------------------------|-------------------------------------|
+| GET    | `/api/carrito/{email}`                       | Obtener el carrito de un usuario    |
+| POST   | `/api/carrito`                               | Agregar producto al carrito         |
+| DELETE | `/api/carrito/{email}/producto/{idProducto}` | Eliminar un producto del carrito    |
+| DELETE | `/api/carrito/{email}`                       | Vaciar todo el carrito              |
+
+### Favoritos
+
+| Método | Ruta                                         | Descripción                            |
+|--------|----------------------------------------------|----------------------------------------|
+| GET    | `/api/favoritos/{email}`                    | Obtener lista de favoritos             |
+| POST   | `/api/favoritos`                            | Agregar producto a favoritos           |
+| DELETE | `/api/favoritos/{email}/producto/{idProducto}` | Quitar producto de favoritos       |
+
+### Historial
+
+| Método | Ruta                         | Descripción                       |
+|--------|------------------------------|-----------------------------------|
+| GET    | `/api/historial/{email}`     | Ver historial de navegación       |
+| POST   | `/api/historial`             | Registrar una navegación de producto |
+
+---
+
+## Integración con Venta-Service
+
+Aunque este microservicio no registra ventas, permite:
+
+- Armar la estructura de datos del carrito del usuario.
+- Consultar productos con stock desde `inventario-service`.
+- Validar el usuario que está comprando con `usuarios-auth-service`.
+
+El frontend puede utilizar estos datos para enviarlos a `venta-service`.
 
 ---
 
