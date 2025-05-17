@@ -24,6 +24,30 @@ Además, **consume microservicios externos** para validar usuarios y productos, 
 
 ---
 
+## Configuración del entorno
+
+### Base de datos
+
+- Motor: MySQL (MariaDB compatible)
+- Nombre: `clienteweb_db`
+- Usuario: `root`
+- Contraseña: *(vacía por defecto en XAMPP)*
+
+### Archivo `application.properties`
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/clienteweb_db?useSSL=false&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=
+
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+server.port=8083
+```
+
+---
+
 ## Arquitectura
 
 Este microservicio consume:
