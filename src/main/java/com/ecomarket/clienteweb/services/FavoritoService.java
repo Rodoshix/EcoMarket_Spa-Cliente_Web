@@ -5,6 +5,7 @@ import com.ecomarket.clienteweb.dto.UsuarioDTO;
 import com.ecomarket.clienteweb.model.Favorito;
 import com.ecomarket.clienteweb.repository.FavoritoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,6 +19,12 @@ import java.util.List;
 @Service
 @Transactional 
 public class FavoritoService {
+
+    @Value("${auth.mock.enabled:false}")
+    private boolean mockAuth;
+
+    @Value("${inventario.mock.enabled:false}")
+    private boolean mockInventario;
 
     @Autowired
     private FavoritoRepository favoritoRepository;
@@ -33,7 +40,8 @@ public class FavoritoService {
     // Agregar un producto a favoritos (requiere validación de usuario y producto)
     public Favorito agregarFavorito(Favorito favorito, String jwtToken) {
         verificarUsuario(favorito.getEmailUsuario(), jwtToken);
-
+    
+    if (!mockInventario) {
         // Consultar producto desde inventario-service
         String urlProducto = "http://localhost:8082/api/productos/" + favorito.getIdProducto();
         ProductoDTO producto = restTemplate.getForObject(urlProducto, ProductoDTO.class);
@@ -45,7 +53,12 @@ public class FavoritoService {
         favorito.setNombreProducto(producto.getNombre());
         favorito.setCategoria(producto.getCategoria());
         favorito.setPrecio(producto.getPrecioUnitario());
-
+    } else {
+        // Datos simulados en entorno de pruebas
+        favorito.setNombreProducto("Producto Simulado");
+        favorito.setCategoria("Categoría Test");
+        favorito.setPrecio(9990.0);
+    }
         return favoritoRepository.save(favorito);
     }
 
@@ -57,6 +70,8 @@ public class FavoritoService {
 
     // Validar usuario autenticado vía JWT (token se reenvía a usuarios-auth-service)
     private void verificarUsuario(String emailUsuario, String jwtToken) {
+        if (mockAuth) return; // ← Evita la llamada real en entorno de test
+
         String url = "http://localhost:8081/api/usuarios/buscar?email=" + emailUsuario;
 
         HttpHeaders headers = new HttpHeaders();

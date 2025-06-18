@@ -5,6 +5,7 @@ import com.ecomarket.clienteweb.dto.UsuarioDTO;
 import com.ecomarket.clienteweb.model.HistorialNavegacion;
 import com.ecomarket.clienteweb.repository.HistorialNavegacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,6 +20,12 @@ import java.util.List;
 @Service
 @Transactional 
 public class HistorialNavegacionService {
+
+    @Value("${auth.mock.enabled:false}")
+    private boolean mockAuth;
+
+    @Value("${inventario.mock.enabled:false}")
+    private boolean mockInventario;
 
     @Autowired
     private HistorialNavegacionRepository historialRepo;
@@ -35,6 +42,11 @@ public class HistorialNavegacionService {
     public HistorialNavegacion registrarNavegacion(HistorialNavegacion item, String jwtToken) {
         verificarUsuario(item.getEmailUsuario(), jwtToken);
 
+        if (mockInventario) {
+            // Simulación de datos para test
+            item.setNombreProducto("Producto Mock");
+            item.setCategoria("Categoría Mock");
+        } else {
         // Obtener producto desde inventario-service
         String urlProducto = "http://localhost:8082/api/productos/" + item.getIdProducto();
         ProductoDTO producto = restTemplate.getForObject(urlProducto, ProductoDTO.class);
@@ -45,7 +57,7 @@ public class HistorialNavegacionService {
 
         item.setNombreProducto(producto.getNombre());
         item.setCategoria(producto.getCategoria());
-
+        }
         // Si no viene fecha, la generamos
         if (item.getFechaHora() == null) {
             item.setFechaHora(LocalDateTime.now());
@@ -56,6 +68,8 @@ public class HistorialNavegacionService {
 
     // Validación con reenvío del token JWT a usuarios-auth
     private void verificarUsuario(String emailUsuario, String jwtToken) {
+        if (mockAuth) return; // ← Evita la llamada real en entorno de test
+
         String url = "http://localhost:8081/api/usuarios/buscar?email=" + emailUsuario;
 
         HttpHeaders headers = new HttpHeaders();

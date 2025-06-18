@@ -5,6 +5,7 @@ import com.ecomarket.clienteweb.dto.UsuarioDTO;
 import com.ecomarket.clienteweb.model.Carrito;
 import com.ecomarket.clienteweb.repository.CarritoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,6 +20,12 @@ import java.util.List;
 @Transactional 
 public class CarritoService {
 
+    @Value("${auth.mock.enabled:false}")
+    private boolean mockAuth;
+
+    @Value("${inventario.mock.enabled:false}")
+    private boolean mockInventario;
+    
     @Autowired
     private CarritoRepository carritoRepository;
 
@@ -34,7 +41,7 @@ public class CarritoService {
     public Carrito agregarProducto(Carrito item, String jwtToken) {
         // Verificar usuario con token
         verificarUsuario(item.getEmailUsuario(), jwtToken);
-
+    if (!mockInventario) {
         // Obtener datos del producto desde inventario-service
         String urlProducto = "http://localhost:8082/api/productos/" + item.getIdProducto();
         ProductoDTO producto = restTemplate.getForObject(urlProducto, ProductoDTO.class);
@@ -45,7 +52,11 @@ public class CarritoService {
 
         item.setNombreProducto(producto.getNombre());
         item.setPrecioUnitario(producto.getPrecioUnitario());
-
+    } else {
+        // Datos simulados para entorno de test
+        item.setNombreProducto("Producto Simulado");
+        item.setPrecioUnitario(9990.0);
+    }
         return carritoRepository.save(item);
     }
 
@@ -61,6 +72,8 @@ public class CarritoService {
 
     // Método privado para validar usuario usando JWT
     private void verificarUsuario(String emailUsuario, String jwtToken) {
+        if (mockAuth) return; // ← Evita la llamada real en test
+
         String url = "http://localhost:8081/api/usuarios/buscar?email=" + emailUsuario;
 
         HttpHeaders headers = new HttpHeaders();
